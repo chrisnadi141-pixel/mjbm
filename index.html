@@ -2,43 +2,77 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               minimum-scale=1,
-               user-scalable=no,
-               viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Display Jadwal Sholat - Masjid Jami' Baitul Muttaqin</title>
 
 <style>
 
+#headerBox{
+  width:100%;
+  max-width:100vw;
+  margin:0 auto 20px;
+  padding:0 20px;          
+  text-align:center;
+  box-sizing:border-box;
+}
+
+/* LOGO */
+#headerBox img{
+  width:140px;
+  max-width:80%;
+  margin:0 auto 10px;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(0,0,0,0.8));
+}
 
 /* HEADER */
 #headerTop{
-  display:grid;
-  grid-template-columns:1fr 2fr 1fr;
-  align-items:center;
-  background:rgba(0,0,0,.45);
-  padding:15px 30px;
-  border-radius:18px;
-  margin-bottom:25px;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: calc(100% - 40px);
+  max-width: 1600px;
+
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+
+  background: rgba(0,0,0,.55);
+  padding: 20px 40px;
+  border-radius: 20px;
+
+  z-index: 1000;
+  backdrop-filter: blur(6px);
 }
 
 #jamDigital{
-  font-size:7vw;
+  font-size:clamp(2.5rem, 5vw, 4rem);
   font-weight:900;
+  margin-top:10px;
+  text-align:center;
+  width:100%;
   color:#00ffff;
-  text-shadow:0 0 15px rgba(0,255,255,.9);
+  text-shadow:
+    0 0 12px rgba(0,255,255,0.8),
+    0 0 20px rgba(0,255,255,0.4);
 }
 
 .header-center{text-align:center}
 
 #masjidName{
-  font-size:4.5vw;
+  font-size:clamp(2rem, 4vw, 3rem);
   font-weight:900;
+  letter-spacing:1px;
+  margin:0 auto;
+  text-align:center;
+  line-height:1.2;
+  word-wrap:break-word;
+  text-shadow:
+    0 0 12px rgba(0,0,0,0.8),
+    0 0 20px rgba(0,255,255,0.4);
 }
-
 /* ALAMAT BERJALAN */
 #alamatWrapper{
   overflow:hidden;
@@ -49,7 +83,7 @@
   display:inline-block;
   padding-left:100%;
   animation:alamatJalan 18s linear infinite;
-  font-size:1.3vw;
+  font-size:1.3rem;
   color:#ffeeaa;
 }
 @keyframes alamatJalan{
@@ -58,28 +92,36 @@
 }
 
 .header-right{text-align:right}
-#tanggalDisplay{font-size:2.8vw}
-#hijriDisplay{font-size:2.8vw;color:#ffd966}
+#tanggalDisplay,
+#hijriDisplay{
+  font-size:clamp(1.2rem, 2.5vw, 1.6rem);
+  text-align:center;
+  margin:6px auto 0;
+  display:block;
+  width:100%;
+}
 
-
-
+#hijriDisplay{
+  color:#ffeeaa;
+  font-weight:700;
+  text-shadow:0 0 8px rgba(255,200,50,0.8);
+}
 
 /* HARI BESAR */
 #hariBesarBox{
   background:rgba(0,0,0,.55);
   padding:12px 14px;
   border-radius:12px;
-  position: fixed;
+  position: absolute;
   right:10px;
-  top:160px;
+  top:200px;
   max-width:300px;
-  font-size:1.8vw;
+  font-size:1rem;
   font-weight:600;
   text-align:right;
   color:#ffd966;
+  z-index: 10;
 }
-
-
 
 /* TABLE */
 table{
@@ -87,7 +129,7 @@ table{
   max-width:700px;
   margin:auto;
   border-collapse:collapse;
-  font-size:2vw;
+  font-size:1.4rem;
 }
 th,td{
   padding:12px;
@@ -98,7 +140,7 @@ th,td{
 #marqueeBox{
   background:rgba(0,0,0,.55);
   padding:12px;
-  font-size:3.5vw;
+  font-size:1.6rem;
   margin-top:25px;
   border-radius:8px;
   overflow:hidden;
@@ -118,7 +160,7 @@ th,td{
   position:fixed;
   inset:0;
   background:black;
-  display:none;
+  display: none;
   align-items:center;
   justify-content:center;
   z-index:9999;
@@ -127,13 +169,13 @@ th,td{
 #adzanOverlay img{
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:contain;
 }
 
 
 </style>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style-A.css">
 
 </head>
 
@@ -210,14 +252,14 @@ th,td{
 
 <!-- OVERLAY ADZAN IMAGE -->
 <div id="adzanOverlay">
-  <img src="adzan.jpg" alt="Adzan">
+  <img src="waktu.jpg" alt="Adzan">
 </div>
 
 <!-- ================= DATA SHOLAT ================= -->
-<script src="data.js"></script>
+<script src="script.js"></script>
 
 <script>
-/* UPDATE JADWAL DARI data.js */
+/* UPDATE JADWAL DARI script.js */
 const ids = ["imsak","subuh","dzuhur","ashar","maghrib","isya"];
 
 const updateJadwalHTML = () => {
@@ -280,9 +322,9 @@ const hijriMonths = [
 ];
 
 const d = new Date();
-
+d.setDate(d.getDate() - 1);
 const fmt = new Intl.DateTimeFormat(
-  'id-US-u-ca-islamic-umalqura',
+  'id-ID-u-ca-islamic-umalqura',
   { day:'numeric', month:'numeric', year:'numeric', weekday:'long' }
 );
 
@@ -301,7 +343,7 @@ document.getElementById("hijriDisplay").innerHTML =
 /* HARI BESAR ISLAM */
 const hariBesar=[
   {n:"Isra Mi'raj Nabi (ﷺ)",m:1,d:16},
-  {n:"Awal Ramadhan",m:2,d:18},
+  {n:"Awal Ramadhan",m:2,d:19},
   {n:"Nuzulul Qur'an",m:3,d:07},
   {n:"Idul Fitri",m:3,d:20},
   {n:"Idul Adha",m:5,d:27},
@@ -324,7 +366,7 @@ updateHariBesar()
 
 
 /* BACKGROUND SLIDE */
-const bg=["sudimara.jpg","masjid2.jpg"]
+const bg=["nabawi1.jpg","masjid2.jpg"]
 let i=0
 setInterval(()=>{
   document.body.style.backgroundImage=`url('${bg[i]}')`
@@ -379,4 +421,6 @@ setInterval(cekAdzan,1000);
 </body>
 
 </html>
+
+
 
