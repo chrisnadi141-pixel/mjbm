@@ -5,7 +5,7 @@
 let jadwal = null
 let sudahAdzan = {
   Subuh:false,
-  Zuhur:false,
+  Dzuhur:false,
   Asar:false,
   Maghrib:false,
   Isya:false
@@ -30,58 +30,76 @@ fetch(`https://api.myquran.com/v2/sholat/jadwal/${lokasiId}/${new Date().toISOSt
 })
 
 setInterval(() => {
-  if(!jadwal) return
+  if (!jadwal) return;
 
-  const now = new Date()
-  const today = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  )
+  const now = new Date();
 
-  const list = [
-    {n:"Subuh",t:jadwal.subuh},
-    {n:"Zuhur",t:jadwal.dzuhur},
-    {n:"Asar",t:jadwal.ashar},
-    {n:"Maghrib",t:jadwal.maghrib},
-    {n:"Isya",t:jadwal.isya}
-  ]
+  const urutanSholat = [
+    { nama: "Subuh",    key: "subuh" },
+    { nama: "Dzuhur",    key: "dzuhur" },
+    { nama: "Asar",     key: "ashar" },
+    { nama: "Maghrib",  key: "maghrib" },
+    { nama: "Isya",     key: "isya" }
+  ];
 
-  let next = null
+  let next = null;
 
-  list.forEach(j => {
-    const [h,m] = j.t.split(":")
-    const d = new Date(today.getFullYear(),today.getMonth(),today.getDate(),h,m)
-    if(d > now && !next) next = {...j,d}
-  })
+  // cari sholat berikutnya hari ini
+  for (const s of urutanSholat) {
+    const waktu = jadwal[s.key];
+    if (!waktu) continue;
 
-  if(!next){
-    countdown.textContent = "Semua sholat hari ini telah selesai"
-    return
+    const [h, m] = waktu.split(":");
+    const t = new Date();
+    t.setHours(h, m, 0, 0);
+
+    if (t > now) {
+      next = { nama: s.nama, t };
+      break;
+    }
   }
 
-  const diff = next.d - now
-  const h = Math.floor(diff / 3600000)
-  const m = Math.floor((diff % 3600000) / 60000)
-  const s = Math.floor((diff % 60000) / 1000)
+  // kalau sudah lewat semua → Subuh besok
+  if (!next) {
+    const [h, m] = jadwal.subuh.split(":");
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    t.setHours(h, m, 0, 0);
+    next = { nama: "Subuh", t };
+  }
 
-  countdown.innerHTML =
-  `<span style="color:white;font-weight:bold;">
-     MENUJU ${next.n.toUpperCase()}
-   </span>
-   : <span style="color:red;">
-     ${h}j ${m}m ${s}d
-   </span>`;
+  // =====================
+  // HITUNG COUNTDOWN
+  // =====================
+  const diff = next.t - now;
+
+  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+  
+
+  countdown.innerHTML = `
+    <span style="color:red;font-weight:bold;">
+      ${next.nama.toUpperCase()}
+    </span>
+    : <span style="color:white;">
+      -${h}: ${m}: ${s}
+    </span>
+  `;
 
   const nowHM =
-  `${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}`
+  `${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}`;
 
   if(nowHM === next.t && !sudahAdzan[next.n]){
-    adzanAudio.play()
-    sudahAdzan[next.n] = true
+    adzanAudio.play();
+    sudahAdzan[next.n] = true;
   }
 
 }, 1000)
+
+
+
+
 
 
 
